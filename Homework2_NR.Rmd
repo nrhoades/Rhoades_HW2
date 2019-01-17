@@ -1,0 +1,76 @@
+---
+title: "assignment2"
+author: "Rhaodesn"
+date: "1/15/2019"
+output: html_document
+---
+
+
+*** This is the solution in BaseR
+```{r}
+
+data <- "assign2_data.txt"
+df <- read.delim (data, header = TRUE)
+df
+
+
+df$ID <- row(df)
+df
+
+df$closest <- ifelse(df$value==1, df$ID, 
+                        ifelse(df$value==0, 0,NA))
+df
+
+df$closest[df$closest==0] <- NA
+df
+
+f1 <- function(x) {
+  N <- length(x)
+  na.pos <- which(is.na(x))
+  if (length(na.pos) %in% c(0, N)) {
+    return(x)
+  }
+  non.na.pos <- which(!is.na(x))
+  intervals  <- findInterval(na.pos, non.na.pos,
+                             all.inside = TRUE)
+  left.pos   <- non.na.pos[pmax(1, intervals)]
+  right.pos  <- non.na.pos[pmin(N, intervals+1)]
+  left.dist  <- na.pos - left.pos
+  right.dist <- right.pos - na.pos
+
+  x[na.pos] <- ifelse(left.dist <= right.dist,
+                        x[left.pos], x[right.pos])
+  return(x)
+}
+
+
+f1
+df <- apply(df, 2, f1)
+
+df
+
+df <- as.data.frame(df[,-2])
+df
+
+df$closest
+
+```
+
+
+
+
+
+
+
+
+Our try at a solution with TidyVerse (didn't get very far)
+
+```{r}
+library (tidyverse)
+df <- read.delim("assign2_data.txt", header = TRUE)
+
+df <- rename(df, a=value)
+
+df <- df %>% mutate(c = ifelse(a == 1, row_number(), NA))
+```
+
